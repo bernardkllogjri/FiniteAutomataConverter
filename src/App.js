@@ -130,13 +130,11 @@ export default class extends Component {
   render(){
     let {
       AFD,
-      AFJD,
       isAFJD,
       graph,
       options,
       events,
     } = this.state;
-    let automat = (!isAFJD && !!AFD) ? AFD : AFJD;
 
     return (
         <div id='graph' style={{ width: '100%', height: '100%' }}>
@@ -147,9 +145,6 @@ export default class extends Component {
           {graph && (
               <Graph ref={ref => this.graph = ref} graph={graph} options={options} events={events} />
           )}
-          {/*<div style={{ width: "100%", height: "100%" }}>*/}
-          {/*{this._render(automat)}*/}
-          {/*</div>*/}
         </div>
     );
   }
