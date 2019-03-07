@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "lodash": "^4.17.11",
     "react": "^16.8.3",
+    "react-digraph": "^6.2.2",
     "react-dom": "^16.8.3",
     "react-scripts": "2.1.5"
   },
