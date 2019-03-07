@@ -1,5 +1,6 @@
 import sortBy from "lodash/sortBy"
 import uniq from "lodash/uniq"
+import intersection from "lodash/intersection"
 import toAFD from "./toAFD";
 import toAFJD from "./toAFJD";
 export { toAFD, toAFJD };
@@ -61,3 +62,39 @@ export const addNewKeys = (AFDTable, newKeys, alfabeti) => {
     return { table: AFDTable, keys};
 };
 
+export const afdGraph = (AFD,finalStates) => {
+    const keys = [...Object.keys(AFD), "e"];
+    const nodes = keys.reduce((acc, state, index) => [...acc, {
+        id: index,
+        label: state,
+        borderWidth: (intersection(finalStates,state.split(",")).length ? 5 : 1)
+    }],[]);
+
+    console.log(nodes);
+    const edges = nodes.reduce((acc, node) => {
+        const nextNode = AFD[node.label];
+        let transitions = [];
+
+        if(!!nextNode){
+            transitions = Object.keys(nextNode).reduce((states,state) => {
+                const label = sortBy(AFD[node.label][state]).join(",");
+                if(!!label){
+                    return [...states, {from: node.id, to: nodes.find(el => el.label === label).id, label: state }]
+                }else{
+                    return [...states, {from: node.id, to: nodes.find(el => el.label === "e").id, label: state }]
+                }
+            },[]);
+        }else{
+            transitions = [
+                { from: node.id, to: nodes.find(el => el.label === "e").id, label: "0" },
+                { from: node.id, to: nodes.find(el => el.label === "e").id, label: "1" },
+            ]
+        }
+
+
+
+        return [...acc, ...transitions];
+    },[]);
+
+    return { edges, nodes };
+};
