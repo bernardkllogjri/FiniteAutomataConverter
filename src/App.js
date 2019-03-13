@@ -2,7 +2,7 @@ import sortBy from "lodash/sortBy"
 import Graph from "react-graph-vis"
 import React, { Component } from "react"
 import intersection from "lodash/intersection"
-import { toAFD, toAFJD, afdGraph } from "./helpers"
+import {toAFD, toAFJD, afdGraph, kalimet} from "./helpers"
 
 
 export default class extends Component {
@@ -11,29 +11,18 @@ export default class extends Component {
     super(props);
 
     this.state = {
-      AFJD: {
-        A: { B: ["0"] },
-        B: { B: ["1"], C: ["ɛ"] },
-        C: { C: ["0"], D: ["1"] },
-        D: { }
-      },
-      finalState: ["D"],
+      AFJD: {},
+      AFD: undefined,
+      finalState: this.props.F,
+      startingState: this.props.S,
       isAFJD: true,
       options :{
         height: '100%',
         width: '100%',
-        layout: {
-          // hierarchical: true
-        },
         edges: {
           color: "#000000"
         }
       },
-      events: {
-        select: function(event) {
-          var { nodes, edges } = event;
-        }
-      }
     };
 
     this.shuffle = this.shuffle.bind(this);
@@ -46,7 +35,8 @@ export default class extends Component {
     const nodes = Object.keys(this.state.AFJD).reduce((acc, state, index) => [...acc, {
       id: index,
       label: state,
-      borderWidth: (this.state.finalState.includes(state) ? 5 : 1)
+      borderWidth: (this.state.finalState.includes(state) ? 5 : 1),
+      color: state === this.state.startingState ? { background: '#2779f0' } : null
     }],[]);
     return {
       nodes,
@@ -58,22 +48,30 @@ export default class extends Component {
                   ...acc, {
                     from: node.id,
                     to: nodes.find(current => current.label === state).id,
-                    label: this.state.AFJD[node.label][state].join(",")
+                    label: this.state.AFJD[node.label][state].join(","),
                   }
                 ],[])],[])
     }
   }
 
   componentDidMount() {
-    this.setState({graph: this.buildGraph()});
+    this.setState({
+      AFJD: this.props.AFJD
+    },() => {
+      this.setState({
+        graph: this.buildGraph()
+      })
+    });
   }
 
   shuffle(type){
+    const transitions = kalimet(this.state.AFJD);
     const result = type === "AFJD" ? toAFJD(this.state.AFJD, this.state.finalState[0]) : toAFD(this.state.AFJD);
 
     if(type === "AFJD"){
 
       const { automat, additionalFinalStates } = result;
+      console.log({ automat });
       this.setState({
         AFJD: automat,
         finalState: [ ...additionalFinalStates, ...this.state.finalState ],
@@ -88,7 +86,7 @@ export default class extends Component {
 
       this.setState({
         AFD: result,
-        graph: afdGraph(result, this.state.finalState)
+        graph: afdGraph(result, this.state.finalState,transitions)
       });
 
     }

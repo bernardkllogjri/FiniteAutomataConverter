@@ -35,9 +35,11 @@ export default automati => {
     let table = addNewKeys(AFDTable, newKeys, alfabeti);
     let intersection = table.keys.filter(key => !gjendjet(table.table).includes(key));
 
+    const filter = key => { console.log(key); return !gjendjet(table.table).includes(key) };
+
     while(intersection.length){
         table = addNewKeys(table.table, intersection, alfabeti);
-        intersection = table.keys.filter(key => !gjendjet(table.table).includes(key));
+        intersection = table.keys.filter(filter);
     }
 
     return table.table;

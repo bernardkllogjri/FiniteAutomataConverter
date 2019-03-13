@@ -62,7 +62,7 @@ export const addNewKeys = (AFDTable, newKeys, alfabeti) => {
     return { table: AFDTable, keys};
 };
 
-export const afdGraph = (AFD,finalStates) => {
+export const afdGraph = (AFD,finalStates, kalimetFillestare) => {
     const keys = [...Object.keys(AFD), "e"];
     const nodes = keys.reduce((acc, state, index) => [...acc, {
         id: index,
@@ -85,16 +85,30 @@ export const afdGraph = (AFD,finalStates) => {
                 }
             },[]);
         }else{
-            transitions = [
-                { from: node.id, to: nodes.find(el => el.label === "e").id, label: "0" },
-                { from: node.id, to: nodes.find(el => el.label === "e").id, label: "1" },
-            ]
+            transitions = kalimetFillestare.map( kalimi => ({ from: node.id, to: nodes.find(el => el.label === "e").id, label: kalimi }))
         }
-
 
 
         return [...acc, ...transitions];
     },[]);
 
-    return { edges, nodes };
+    const finalEdges = edges.reduce((acc,edge) => {
+        let found = false;
+        acc.forEach((el,index) => {
+            if(el.from === edge.from && el.to === edge.to){
+                acc[index] = { ...edge, ...{ label: edge.label+=`,${el.label }` } };
+                found = true;
+            }
+        });
+
+        if(found){
+            return acc;
+        }
+        return [ ...acc, edge]
+    },[]);
+
+    console.log(finalEdges);
+
+
+    return { edges: finalEdges, nodes };
 };
